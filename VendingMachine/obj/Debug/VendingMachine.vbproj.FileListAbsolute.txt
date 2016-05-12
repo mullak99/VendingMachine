@@ -13,3 +13,11 @@ E:\Libraries\GitHub\VendingMachine\VendingMachine\bin\Debug\VendingMachine.exe.c
 E:\Libraries\GitHub\VendingMachine\VendingMachine\obj\Debug\VendingMachine.exe
 E:\Libraries\GitHub\VendingMachine\VendingMachine\obj\Debug\VendingMachine.xml
 E:\Libraries\GitHub\VendingMachine\VendingMachine\obj\Debug\VendingMachine.pdb
+E:\Libraries\GitHub\VendingMachine\VendingMachine\obj\Debug\VendingMachine.vbprojResolveAssemblyReference.cache
+E:\Libraries\GitHub\VendingMachine\VendingMachine\obj\Debug\VendingMachine.VendingMachine.resources
+E:\Libraries\GitHub\VendingMachine\VendingMachine\obj\Debug\VendingMachine.Resources.resources
+E:\Libraries\GitHub\VendingMachine\VendingMachine\obj\Debug\VendingMachine.vbproj.GenerateResource.Cache
+E:\Libraries\GitHub\VendingMachine\VendingMachine\bin\Debug\VendingMachine.exe
+E:\Libraries\GitHub\VendingMachine\VendingMachine\bin\Debug\VendingMachine.pdb
+E:\Libraries\GitHub\VendingMachine\VendingMachine\bin\Debug\VendingMachine.xml
+E:\Libraries\GitHub\VendingMachine\VendingMachine\obj\Debug\VendingMachine.ConsoleForm.resources

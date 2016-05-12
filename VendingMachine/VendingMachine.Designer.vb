@@ -104,6 +104,7 @@ Partial Class VendingMachine
         Me.confirm_purchase_button = New System.Windows.Forms.Button()
         Me.moneyPrompt = New System.Windows.Forms.Label()
         Me.dispensed_items_tray = New System.Windows.Forms.GroupBox()
+        Me.dispense_progress = New System.Windows.Forms.ProgressBar()
         Me.items_collect_button = New System.Windows.Forms.Button()
         Me.dispensed_item6 = New System.Windows.Forms.TextBox()
         Me.dispensed_item5 = New System.Windows.Forms.TextBox()
@@ -112,6 +113,11 @@ Partial Class VendingMachine
         Me.dispensed_item2 = New System.Windows.Forms.TextBox()
         Me.dispensed_item1 = New System.Windows.Forms.TextBox()
         Me.version = New System.Windows.Forms.Label()
+        Me.DispenseTime = New System.Windows.Forms.Timer(Me.components)
+        Me.Toolbar = New System.Windows.Forms.MenuStrip()
+        Me.DebugToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.ConsoleToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.RefillStockToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.CoinBox.SuspendLayout()
         Me.ChangeBox.SuspendLayout()
         Me.main_menu.SuspendLayout()
@@ -123,6 +129,7 @@ Partial Class VendingMachine
         CType(Me.pepsi_button, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.order_menu.SuspendLayout()
         Me.dispensed_items_tray.SuspendLayout()
+        Me.Toolbar.SuspendLayout()
         Me.SuspendLayout()
         '
         'CoinBox
@@ -137,9 +144,9 @@ Partial Class VendingMachine
         Me.CoinBox.Controls.Add(Me.coin_2p_insert)
         Me.CoinBox.Controls.Add(Me.coin_1p_insert)
         Me.CoinBox.Controls.Add(Me.ChangeBox)
-        Me.CoinBox.Location = New System.Drawing.Point(680, 12)
+        Me.CoinBox.Location = New System.Drawing.Point(680, 31)
         Me.CoinBox.Name = "CoinBox"
-        Me.CoinBox.Size = New System.Drawing.Size(208, 567)
+        Me.CoinBox.Size = New System.Drawing.Size(208, 584)
         Me.CoinBox.TabIndex = 0
         Me.CoinBox.TabStop = False
         Me.CoinBox.Text = "Coins"
@@ -245,9 +252,9 @@ Partial Class VendingMachine
         Me.ChangeBox.Controls.Add(Me.coin_2p_return)
         Me.ChangeBox.Controls.Add(Me.coin_1p_return_label)
         Me.ChangeBox.Controls.Add(Me.coin_1p_return)
-        Me.ChangeBox.Location = New System.Drawing.Point(6, 291)
+        Me.ChangeBox.Location = New System.Drawing.Point(6, 297)
         Me.ChangeBox.Name = "ChangeBox"
-        Me.ChangeBox.Size = New System.Drawing.Size(195, 270)
+        Me.ChangeBox.Size = New System.Drawing.Size(196, 270)
         Me.ChangeBox.TabIndex = 0
         Me.ChangeBox.TabStop = False
         Me.ChangeBox.Text = "Change"
@@ -278,6 +285,7 @@ Partial Class VendingMachine
         Me.coin_200p_return.ReadOnly = True
         Me.coin_200p_return.Size = New System.Drawing.Size(34, 20)
         Me.coin_200p_return.TabIndex = 14
+        Me.coin_200p_return.Text = "0"
         Me.coin_200p_return.TextAlign = System.Windows.Forms.HorizontalAlignment.Right
         '
         'coin_100p_return_label
@@ -296,6 +304,7 @@ Partial Class VendingMachine
         Me.coin_100p_return.ReadOnly = True
         Me.coin_100p_return.Size = New System.Drawing.Size(34, 20)
         Me.coin_100p_return.TabIndex = 12
+        Me.coin_100p_return.Text = "0"
         Me.coin_100p_return.TextAlign = System.Windows.Forms.HorizontalAlignment.Right
         '
         'coin_50p_return_label
@@ -314,6 +323,7 @@ Partial Class VendingMachine
         Me.coin_50p_return.ReadOnly = True
         Me.coin_50p_return.Size = New System.Drawing.Size(34, 20)
         Me.coin_50p_return.TabIndex = 10
+        Me.coin_50p_return.Text = "0"
         Me.coin_50p_return.TextAlign = System.Windows.Forms.HorizontalAlignment.Right
         '
         'coin_20p_return_label
@@ -332,6 +342,7 @@ Partial Class VendingMachine
         Me.coin_20p_return.ReadOnly = True
         Me.coin_20p_return.Size = New System.Drawing.Size(34, 20)
         Me.coin_20p_return.TabIndex = 8
+        Me.coin_20p_return.Text = "0"
         Me.coin_20p_return.TextAlign = System.Windows.Forms.HorizontalAlignment.Right
         '
         'coin_10p_return_label
@@ -350,6 +361,7 @@ Partial Class VendingMachine
         Me.coin_10p_return.ReadOnly = True
         Me.coin_10p_return.Size = New System.Drawing.Size(34, 20)
         Me.coin_10p_return.TabIndex = 6
+        Me.coin_10p_return.Text = "0"
         Me.coin_10p_return.TextAlign = System.Windows.Forms.HorizontalAlignment.Right
         '
         'coin_5p_return_label
@@ -368,6 +380,7 @@ Partial Class VendingMachine
         Me.coin_5p_return.ReadOnly = True
         Me.coin_5p_return.Size = New System.Drawing.Size(34, 20)
         Me.coin_5p_return.TabIndex = 4
+        Me.coin_5p_return.Text = "0"
         Me.coin_5p_return.TextAlign = System.Windows.Forms.HorizontalAlignment.Right
         '
         'coin_2p_return_label
@@ -386,6 +399,7 @@ Partial Class VendingMachine
         Me.coin_2p_return.ReadOnly = True
         Me.coin_2p_return.Size = New System.Drawing.Size(34, 20)
         Me.coin_2p_return.TabIndex = 2
+        Me.coin_2p_return.Text = "0"
         Me.coin_2p_return.TextAlign = System.Windows.Forms.HorizontalAlignment.Right
         '
         'coin_1p_return_label
@@ -404,12 +418,13 @@ Partial Class VendingMachine
         Me.coin_1p_return.ReadOnly = True
         Me.coin_1p_return.Size = New System.Drawing.Size(34, 20)
         Me.coin_1p_return.TabIndex = 0
+        Me.coin_1p_return.Text = "0"
         Me.coin_1p_return.TextAlign = System.Windows.Forms.HorizontalAlignment.Right
         '
         'coin_cancel_button
         '
         Me.coin_cancel_button.Enabled = False
-        Me.coin_cancel_button.Location = New System.Drawing.Point(516, 270)
+        Me.coin_cancel_button.Location = New System.Drawing.Point(516, 289)
         Me.coin_cancel_button.Name = "coin_cancel_button"
         Me.coin_cancel_button.Size = New System.Drawing.Size(158, 33)
         Me.coin_cancel_button.TabIndex = 10
@@ -440,9 +455,9 @@ Partial Class VendingMachine
         Me.main_menu.Controls.Add(Me.pepsi_price)
         Me.main_menu.Controls.Add(Me.coke_button)
         Me.main_menu.Controls.Add(Me.pepsi_button)
-        Me.main_menu.Location = New System.Drawing.Point(12, 12)
+        Me.main_menu.Location = New System.Drawing.Point(12, 31)
         Me.main_menu.Name = "main_menu"
-        Me.main_menu.Size = New System.Drawing.Size(332, 567)
+        Me.main_menu.Size = New System.Drawing.Size(332, 584)
         Me.main_menu.TabIndex = 1
         Me.main_menu.TabStop = False
         Me.main_menu.Text = "Menu"
@@ -657,7 +672,7 @@ Partial Class VendingMachine
         Me.order_menu.Controls.Add(Me.order_item_3)
         Me.order_menu.Controls.Add(Me.order_item_2)
         Me.order_menu.Controls.Add(Me.order_item_1)
-        Me.order_menu.Location = New System.Drawing.Point(350, 12)
+        Me.order_menu.Location = New System.Drawing.Point(350, 31)
         Me.order_menu.Name = "order_menu"
         Me.order_menu.Size = New System.Drawing.Size(324, 246)
         Me.order_menu.TabIndex = 0
@@ -921,7 +936,7 @@ Partial Class VendingMachine
         'confirm_purchase_button
         '
         Me.confirm_purchase_button.Enabled = False
-        Me.confirm_purchase_button.Location = New System.Drawing.Point(350, 270)
+        Me.confirm_purchase_button.Location = New System.Drawing.Point(350, 289)
         Me.confirm_purchase_button.Name = "confirm_purchase_button"
         Me.confirm_purchase_button.Size = New System.Drawing.Size(158, 33)
         Me.confirm_purchase_button.TabIndex = 6
@@ -930,16 +945,17 @@ Partial Class VendingMachine
         '
         'moneyPrompt
         '
-        Me.moneyPrompt.AutoSize = True
-        Me.moneyPrompt.Font = New System.Drawing.Font("Microsoft Sans Serif", 15.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.moneyPrompt.Location = New System.Drawing.Point(24, 260)
+        Me.moneyPrompt.Font = New System.Drawing.Font("Microsoft Sans Serif", 13.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.moneyPrompt.Location = New System.Drawing.Point(12, 279)
         Me.moneyPrompt.Name = "moneyPrompt"
-        Me.moneyPrompt.Size = New System.Drawing.Size(303, 25)
+        Me.moneyPrompt.Size = New System.Drawing.Size(332, 43)
         Me.moneyPrompt.TabIndex = 2
         Me.moneyPrompt.Text = "Please Insert Money To Continue"
+        Me.moneyPrompt.TextAlign = System.Drawing.ContentAlignment.TopCenter
         '
         'dispensed_items_tray
         '
+        Me.dispensed_items_tray.Controls.Add(Me.dispense_progress)
         Me.dispensed_items_tray.Controls.Add(Me.items_collect_button)
         Me.dispensed_items_tray.Controls.Add(Me.dispensed_item6)
         Me.dispensed_items_tray.Controls.Add(Me.dispensed_item5)
@@ -947,26 +963,33 @@ Partial Class VendingMachine
         Me.dispensed_items_tray.Controls.Add(Me.dispensed_item3)
         Me.dispensed_items_tray.Controls.Add(Me.dispensed_item2)
         Me.dispensed_items_tray.Controls.Add(Me.dispensed_item1)
-        Me.dispensed_items_tray.Location = New System.Drawing.Point(350, 313)
+        Me.dispensed_items_tray.Location = New System.Drawing.Point(350, 332)
         Me.dispensed_items_tray.Name = "dispensed_items_tray"
-        Me.dispensed_items_tray.Size = New System.Drawing.Size(324, 266)
+        Me.dispensed_items_tray.Size = New System.Drawing.Size(324, 283)
         Me.dispensed_items_tray.TabIndex = 11
         Me.dispensed_items_tray.TabStop = False
         Me.dispensed_items_tray.Text = "Dispensed Items"
         '
+        'dispense_progress
+        '
+        Me.dispense_progress.Location = New System.Drawing.Point(6, 24)
+        Me.dispense_progress.Name = "dispense_progress"
+        Me.dispense_progress.Size = New System.Drawing.Size(312, 23)
+        Me.dispense_progress.TabIndex = 34
+        '
         'items_collect_button
         '
         Me.items_collect_button.Enabled = False
-        Me.items_collect_button.Location = New System.Drawing.Point(81, 204)
+        Me.items_collect_button.Location = New System.Drawing.Point(81, 230)
         Me.items_collect_button.Name = "items_collect_button"
-        Me.items_collect_button.Size = New System.Drawing.Size(152, 31)
+        Me.items_collect_button.Size = New System.Drawing.Size(152, 33)
         Me.items_collect_button.TabIndex = 12
         Me.items_collect_button.Text = "Collect Items"
         Me.items_collect_button.UseVisualStyleBackColor = True
         '
         'dispensed_item6
         '
-        Me.dispensed_item6.Location = New System.Drawing.Point(81, 178)
+        Me.dispensed_item6.Location = New System.Drawing.Point(81, 204)
         Me.dispensed_item6.Name = "dispensed_item6"
         Me.dispensed_item6.ReadOnly = True
         Me.dispensed_item6.Size = New System.Drawing.Size(152, 20)
@@ -974,7 +997,7 @@ Partial Class VendingMachine
         '
         'dispensed_item5
         '
-        Me.dispensed_item5.Location = New System.Drawing.Point(81, 152)
+        Me.dispensed_item5.Location = New System.Drawing.Point(81, 178)
         Me.dispensed_item5.Name = "dispensed_item5"
         Me.dispensed_item5.ReadOnly = True
         Me.dispensed_item5.Size = New System.Drawing.Size(152, 20)
@@ -982,7 +1005,7 @@ Partial Class VendingMachine
         '
         'dispensed_item4
         '
-        Me.dispensed_item4.Location = New System.Drawing.Point(81, 126)
+        Me.dispensed_item4.Location = New System.Drawing.Point(81, 152)
         Me.dispensed_item4.Name = "dispensed_item4"
         Me.dispensed_item4.ReadOnly = True
         Me.dispensed_item4.Size = New System.Drawing.Size(152, 20)
@@ -990,7 +1013,7 @@ Partial Class VendingMachine
         '
         'dispensed_item3
         '
-        Me.dispensed_item3.Location = New System.Drawing.Point(81, 100)
+        Me.dispensed_item3.Location = New System.Drawing.Point(81, 126)
         Me.dispensed_item3.Name = "dispensed_item3"
         Me.dispensed_item3.ReadOnly = True
         Me.dispensed_item3.Size = New System.Drawing.Size(152, 20)
@@ -998,7 +1021,7 @@ Partial Class VendingMachine
         '
         'dispensed_item2
         '
-        Me.dispensed_item2.Location = New System.Drawing.Point(81, 74)
+        Me.dispensed_item2.Location = New System.Drawing.Point(81, 100)
         Me.dispensed_item2.Name = "dispensed_item2"
         Me.dispensed_item2.ReadOnly = True
         Me.dispensed_item2.Size = New System.Drawing.Size(152, 20)
@@ -1006,7 +1029,7 @@ Partial Class VendingMachine
         '
         'dispensed_item1
         '
-        Me.dispensed_item1.Location = New System.Drawing.Point(81, 48)
+        Me.dispensed_item1.Location = New System.Drawing.Point(81, 74)
         Me.dispensed_item1.Name = "dispensed_item1"
         Me.dispensed_item1.ReadOnly = True
         Me.dispensed_item1.Size = New System.Drawing.Size(152, 20)
@@ -1014,18 +1037,51 @@ Partial Class VendingMachine
         '
         'version
         '
-        Me.version.Location = New System.Drawing.Point(848, 578)
+        Me.version.Location = New System.Drawing.Point(848, 618)
         Me.version.Name = "version"
         Me.version.Size = New System.Drawing.Size(54, 20)
         Me.version.TabIndex = 12
         Me.version.Text = "v1.0"
         Me.version.TextAlign = System.Drawing.ContentAlignment.TopRight
         '
+        'DispenseTime
+        '
+        Me.DispenseTime.Interval = 10
+        '
+        'Toolbar
+        '
+        Me.Toolbar.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.DebugToolStripMenuItem})
+        Me.Toolbar.Location = New System.Drawing.Point(0, 0)
+        Me.Toolbar.Name = "Toolbar"
+        Me.Toolbar.Size = New System.Drawing.Size(900, 24)
+        Me.Toolbar.TabIndex = 13
+        Me.Toolbar.Text = "MenuStrip1"
+        Me.Toolbar.Visible = False
+        '
+        'DebugToolStripMenuItem
+        '
+        Me.DebugToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.ConsoleToolStripMenuItem, Me.RefillStockToolStripMenuItem})
+        Me.DebugToolStripMenuItem.Name = "DebugToolStripMenuItem"
+        Me.DebugToolStripMenuItem.Size = New System.Drawing.Size(54, 20)
+        Me.DebugToolStripMenuItem.Text = "Debug"
+        '
+        'ConsoleToolStripMenuItem
+        '
+        Me.ConsoleToolStripMenuItem.Name = "ConsoleToolStripMenuItem"
+        Me.ConsoleToolStripMenuItem.Size = New System.Drawing.Size(152, 22)
+        Me.ConsoleToolStripMenuItem.Text = "Console"
+        '
+        'RefillStockToolStripMenuItem
+        '
+        Me.RefillStockToolStripMenuItem.Name = "RefillStockToolStripMenuItem"
+        Me.RefillStockToolStripMenuItem.Size = New System.Drawing.Size(152, 22)
+        Me.RefillStockToolStripMenuItem.Text = "Refill Stock"
+        '
         'VendingMachine
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(900, 591)
+        Me.ClientSize = New System.Drawing.Size(900, 631)
         Me.Controls.Add(Me.version)
         Me.Controls.Add(Me.dispensed_items_tray)
         Me.Controls.Add(Me.main_menu)
@@ -1034,8 +1090,11 @@ Partial Class VendingMachine
         Me.Controls.Add(Me.order_menu)
         Me.Controls.Add(Me.moneyPrompt)
         Me.Controls.Add(Me.confirm_purchase_button)
+        Me.Controls.Add(Me.Toolbar)
         Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Fixed3D
         Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
+        Me.MainMenuStrip = Me.Toolbar
+        Me.MaximizeBox = False
         Me.Name = "VendingMachine"
         Me.Text = "Vending Machine"
         Me.CoinBox.ResumeLayout(False)
@@ -1054,6 +1113,8 @@ Partial Class VendingMachine
         Me.order_menu.PerformLayout()
         Me.dispensed_items_tray.ResumeLayout(False)
         Me.dispensed_items_tray.PerformLayout()
+        Me.Toolbar.ResumeLayout(False)
+        Me.Toolbar.PerformLayout()
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
@@ -1147,4 +1208,10 @@ Partial Class VendingMachine
     Friend WithEvents winegums_price As Label
     Friend WithEvents winegums_button As PictureBox
     Friend WithEvents version As Label
+    Friend WithEvents dispense_progress As ProgressBar
+    Friend WithEvents DispenseTime As Timer
+    Friend WithEvents Toolbar As MenuStrip
+    Friend WithEvents DebugToolStripMenuItem As ToolStripMenuItem
+    Friend WithEvents ConsoleToolStripMenuItem As ToolStripMenuItem
+    Friend WithEvents RefillStockToolStripMenuItem As ToolStripMenuItem
 End Class

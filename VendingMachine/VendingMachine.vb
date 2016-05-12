@@ -30,6 +30,17 @@
     Dim dairymilkStock As Integer = CInt(Math.Ceiling(Rnd() * 50)) + 2
     Dim winegumsStock As Integer = CInt(Math.Ceiling(Rnd() * 50)) + 2
 
+    Dim Dispensing As Boolean = False
+    Dim DispenseModifier As Integer = 1
+
+    Dim currentTick As Integer = 0
+
+    Dim consoleWindow As New ConsoleForm
+
+    Private Sub appendLog(text As String)
+        consoleWindow.addDebugLine(text)
+    End Sub
+
     Private Sub ResetMachine()
         CurrentMoney = 0
         orderSlot1Count = 0
@@ -44,12 +55,13 @@
         orderSlot4ID = 0
         orderSlot5ID = 0
         orderSlot6ID = 0
-        order_item_1.ResetText()
-        order_item_2.ResetText()
-        order_item_3.ResetText()
-        order_item_4.ResetText()
-        order_item_5.ResetText()
-        order_item_6.ResetText()
+        order_item_1.Text = ""
+        order_item_2.Text = ""
+        order_item_3.Text = ""
+        order_item_4.Text = ""
+        order_item_5.Text = ""
+        order_item_6.Text = ""
+        appendLog("(ResetMachine) Reset Machine")
     End Sub
 
     Private Sub InitMachine()
@@ -61,6 +73,7 @@
         coin_50p_return.Text = "0"
         coin_100p_return.Text = "0"
         coin_200p_return.Text = "0"
+        appendLog("(InitMachine) Initialised Machine")
     End Sub
 
     Private Sub ReturnCoins()
@@ -91,18 +104,22 @@
                 CurrentMoney = CurrentMoney - 0.01
             End If
         End While
+        appendLog("(ReturnCoins) Returned Change")
         ResetMachine()
     End Sub
 
     Private Sub InsertMoney(money As Decimal)
         CurrentMoney = CurrentMoney + money
+        appendLog("(InsertMoney) Inserted " & FormatCurrency(money))
     End Sub
 
     Private Sub SpendMoney(money As Decimal)
         CurrentMoney = CurrentMoney - money
+        appendLog("(SpendMoney) Spent " & FormatCurrency(money))
     End Sub
 
     Private Sub Runtime_Tick(sender As Object, e As EventArgs) Handles Runtime.Tick
+
         display_money.Text = FormatCurrency(CurrentMoney)
         pepsi_price.Text = Convert.ToString(FormatCurrency(pepsiPrice))
         coke_price.Text = Convert.ToString(FormatCurrency(cokePrice))
@@ -126,99 +143,175 @@
         dairymilk_stock.Text = "Stock: " & GetStockValue(104)
         winegums_stock.Text = "Stock: " & GetStockValue(105)
 
-        If CurrentMoney = 0 Then
+        If CurrentMoney = 0 Or Dispensing Then
             main_menu.Visible = False
             coin_cancel_button.Enabled = False
-        End If
-        If CurrentMoney > 0 Then
+        ElseIf CurrentMoney > 0 Then
             main_menu.Visible = True
             coin_cancel_button.Enabled = True
         End If
 
-        If ChangeAvalible() Then
+        If ChangeAwaitingCollection() Or Not Dispensing Then
             coin_change_collect_button.Enabled = True
         Else
             coin_change_collect_button.Enabled = False
         End If
 
-        If orderSlot1Count = 0 Then
+        If ChangeAwaitingCollection() And ItemsAwaitingCollection() Then
+            moneyPrompt.Text = "Please Collect Your Items and Change"
+        ElseIf ChangeAwaitingCollection() And Not ItemsAwaitingCollection() Then
+            moneyPrompt.Text = "Please Collect Your Change"
+        ElseIf Not ChangeAwaitingCollection() And ItemsAwaitingCollection() Then
+            moneyPrompt.Text = "Please Collect Your Items"
+        Else
+            moneyPrompt.Text = "Please Insert Money To Continue"
+        End If
+
+        If orderSlot1Count = 0 Or Dispensing Then
             slot1_remove_item.Enabled = False
         Else
             slot1_remove_item.Enabled = True
         End If
-        If orderSlot2Count = 0 Then
+        If orderSlot2Count = 0 Or Dispensing Then
             slot2_remove_item.Enabled = False
         Else
             slot2_remove_item.Enabled = True
         End If
-        If orderSlot3Count = 0 Then
+        If orderSlot3Count = 0 Or Dispensing Then
             slot3_remove_item.Enabled = False
         Else
             slot3_remove_item.Enabled = True
         End If
-        If orderSlot4Count = 0 Then
+        If orderSlot4Count = 0 Or Dispensing Then
             slot4_remove_item.Enabled = False
         Else
             slot4_remove_item.Enabled = True
         End If
-        If orderSlot5Count = 0 Then
+        If orderSlot5Count = 0 Or Dispensing Then
             slot5_remove_item.Enabled = False
         Else
             slot5_remove_item.Enabled = True
         End If
-        If orderSlot6Count = 0 Then
+        If orderSlot6Count = 0 Or Dispensing Then
             slot6_remove_item.Enabled = False
         Else
             slot6_remove_item.Enabled = True
         End If
 
-        If (TotalPrice() + ValueItemID(orderSlot1ID) > CurrentMoney) Or orderSlot1Count = 0 Or GetStockValue(orderSlot1ID) = 0 Then
+        If (TotalPrice() + ValueItemID(orderSlot1ID) > CurrentMoney) Or orderSlot1Count = 0 Or GetStockValue(orderSlot1ID) = 0 Or Dispensing Then
             slot1_add_item.Enabled = False
         Else
             slot1_add_item.Enabled = True
         End If
-        If (TotalPrice() + ValueItemID(orderSlot2ID) > CurrentMoney) Or orderSlot2Count = 0 Or GetStockValue(orderSlot2ID) = 0 Then
+        If (TotalPrice() + ValueItemID(orderSlot2ID) > CurrentMoney) Or orderSlot2Count = 0 Or GetStockValue(orderSlot2ID) = 0 Or Dispensing Then
             slot2_add_item.Enabled = False
         Else
             slot2_add_item.Enabled = True
         End If
-        If (TotalPrice() + ValueItemID(orderSlot3ID) > CurrentMoney) Or orderSlot3Count = 0 Or GetStockValue(orderSlot3ID) = 0 Then
+        If (TotalPrice() + ValueItemID(orderSlot3ID) > CurrentMoney) Or orderSlot3Count = 0 Or GetStockValue(orderSlot3ID) = 0 Or Dispensing Then
             slot3_add_item.Enabled = False
         Else
             slot3_add_item.Enabled = True
         End If
-        If (TotalPrice() + ValueItemID(orderSlot4ID) > CurrentMoney) Or orderSlot4Count = 0 Or GetStockValue(orderSlot4ID) = 0 Then
+        If (TotalPrice() + ValueItemID(orderSlot4ID) > CurrentMoney) Or orderSlot4Count = 0 Or GetStockValue(orderSlot4ID) = 0 Or Dispensing Then
             slot4_add_item.Enabled = False
         Else
             slot4_add_item.Enabled = True
         End If
-        If (TotalPrice() + ValueItemID(orderSlot5ID) > CurrentMoney) Or orderSlot5Count = 0 Or GetStockValue(orderSlot5ID) = 0 Then
+        If (TotalPrice() + ValueItemID(orderSlot5ID) > CurrentMoney) Or orderSlot5Count = 0 Or GetStockValue(orderSlot5ID) = 0 Or Dispensing Then
             slot5_add_item.Enabled = False
         Else
             slot5_add_item.Enabled = True
         End If
-        If (TotalPrice() + ValueItemID(orderSlot6ID) > CurrentMoney) Or orderSlot6Count = 0 Or GetStockValue(orderSlot6ID) = 0 Then
+        If (TotalPrice() + ValueItemID(orderSlot6ID) > CurrentMoney) Or orderSlot6Count = 0 Or GetStockValue(orderSlot6ID) = 0 Or Dispensing Then
             slot6_add_item.Enabled = False
         Else
             slot6_add_item.Enabled = True
         End If
 
-        If TotalPrice() > 0 Or TotalPrice() > CurrentMoney Then
-            confirm_purchase_button.Enabled = True
-        Else
+        If CurrentMoney = 0 Or TotalPrice() > CurrentMoney Or orderSlot1Count = 0 Or Dispensing Then
             confirm_purchase_button.Enabled = False
+        Else
+            confirm_purchase_button.Enabled = True
         End If
 
-
-        If Not dispensed_item1.Text = "" Then
+        If Not dispensed_item1.Text = "" Or Dispensing Then
             items_collect_button.Enabled = True
+            coin_1p_insert.Enabled = False
+            coin_2p_insert.Enabled = False
+            coin_5p_insert.Enabled = False
+            coin_10p_insert.Enabled = False
+            coin_20p_insert.Enabled = False
+            coin_50p_insert.Enabled = False
+            coin_100p_insert.Enabled = False
+            coin_200p_insert.Enabled = False
         Else
             items_collect_button.Enabled = False
+            coin_1p_insert.Enabled = True
+            coin_2p_insert.Enabled = True
+            coin_5p_insert.Enabled = True
+            coin_10p_insert.Enabled = True
+            coin_20p_insert.Enabled = True
+            coin_50p_insert.Enabled = True
+            coin_100p_insert.Enabled = True
+            coin_200p_insert.Enabled = True
+        End If
+        ShiftOrderList()
+
+        If orderSlot1Count > 0 Then
+            DispenseModifier = (orderSlot1Count + orderSlot2Count + orderSlot3Count + orderSlot4Count + orderSlot5Count + orderSlot6Count)
         End If
 
+        currentTick = currentTick + 1
+
+        consoleWindow.setRuntimeTick(currentTick)
     End Sub
 
+    Private Function ItemsAwaitingCollection()
+        If Not dispensed_item1.Text = "" Then
+            Return True
+            appendLog("(ItemsAwaitingCollection) Items are awaiting collection")
+        Else
+            Return False
+        End If
+    End Function
+
+    Private Function ChangeAwaitingCollection()
+        If (Convert.ToInt32(coin_1p_return.Text) + Convert.ToInt32(coin_2p_return.Text) + Convert.ToInt32(coin_5p_return.Text) + Convert.ToInt32(coin_10p_return.Text) + Convert.ToInt32(coin_20p_return.Text) + Convert.ToInt32(coin_50p_return.Text) + Convert.ToInt32(coin_100p_return.Text) + Convert.ToInt32(coin_200p_return.Text)) > 0 Then
+            Return True
+            appendLog("(ChangeAwaitingCollection) Change is awaiting collection")
+        Else
+            Return False
+        End If
+    End Function
+
     Private Sub PurchaseItems()
+        Dispensing = True
+        dispense_progress.Value = 0
+        DispenseTime.Interval = 10 * DispenseModifier
+        DispenseTime.Start()
+        appendLog("(PurchaseItems) Items Purchased")
+    End Sub
+
+    Dim BarValue As Integer = 0
+    Private Sub DispenseTime_Tick(sender As Object, e As EventArgs) Handles DispenseTime.Tick
+        BarValue = dispense_progress.Value + 2
+        If BarValue > 100 Then
+            BarValue = 100
+        End If
+
+        dispense_progress.Value = BarValue
+        appendLog("(DispenseTime_Tick) Dispensing Items... " & BarValue & "%")
+
+        If dispense_progress.Value = 100 Then
+            DispenseTime.Stop()
+            DispenseItems()
+            Dispensing = False
+            appendLog("(DispenseTime_Tick) Items Dispensed")
+        End If
+    End Sub
+
+    Private Sub DispenseItems()
         dispensed_item1.Text = order_item_1.Text
         dispensed_item2.Text = order_item_2.Text
         dispensed_item3.Text = order_item_3.Text
@@ -229,8 +322,6 @@
         If CurrentMoney > 0 Then
             ReturnCoins()
         End If
-        ResetMachine()
-
     End Sub
 
     Private Function ConvertItemID(itemID As Integer)
@@ -249,6 +340,7 @@
         Else
             Return "Unregistered Item"
         End If
+        appendLog("(ConvertItemID) Converted ID " & itemID)
     End Function
 
     Private Function ValueItemID(itemID As Integer)
@@ -267,32 +359,57 @@
         Else
             Return 0
         End If
+        appendLog("(ValueItemID) Valued ID " & itemID)
     End Function
 
     Private Sub UpdateOrder()
-        If orderSlot1Count = 0 Then
+        If orderSlot1Count = 0 And Not order_item_1.Text = "" Then
             order_item_1.Text = ""
             orderSlot1ID = 0
+            appendLog("(UpdateOrder) Erased orderSlot1")
+        ElseIf orderSlot1ID > 0 And Not order_item_1.Text = orderSlot1Count & "x " & ConvertItemID(orderSlot1ID) Then
+            order_item_1.Text = orderSlot1Count & "x " & ConvertItemID(orderSlot1ID)
+            appendLog("(UpdateOrder) Set orderSlot1 to ID " & orderSlot1ID & " with " & orderSlot1Count & " count")
         End If
-        If orderSlot2Count = 0 Then
+        If orderSlot2Count = 0 And Not order_item_2.Text = "" Then
             order_item_2.Text = ""
             orderSlot2ID = 0
+            appendLog("(UpdateOrder) Erased orderSlot2")
+        ElseIf orderSlot2ID > 0 And Not order_item_2.Text = orderSlot2Count & "x " & ConvertItemID(orderSlot2ID) Then
+            order_item_2.Text = orderSlot2Count & "x " & ConvertItemID(orderSlot2ID)
+            appendLog("(UpdateOrder) Set orderSlot2 to ID " & orderSlot2ID & " with " & orderSlot2Count & " count")
         End If
-        If orderSlot3Count = 0 Then
+        If orderSlot3Count = 0 And Not order_item_3.Text = "" Then
             order_item_3.Text = ""
             orderSlot3ID = 0
+            appendLog("(UpdateOrder) Erased orderSlot3")
+        ElseIf orderSlot3ID > 0 And Not order_item_3.Text = orderSlot3Count & "x " & ConvertItemID(orderSlot3ID) Then
+            order_item_3.Text = orderSlot3Count & "x " & ConvertItemID(orderSlot3ID)
+            appendLog("(UpdateOrder) Set orderSlot3 to ID " & orderSlot3ID & " with " & orderSlot3Count & " count")
         End If
-        If orderSlot4Count = 0 Then
+        If orderSlot4Count = 0 And Not order_item_4.Text = "" Then
             order_item_4.Text = ""
             orderSlot4ID = 0
+            appendLog("(UpdateOrder) Erased orderSlot4")
+        ElseIf orderSlot4ID > 0 And Not order_item_4.Text = orderSlot4Count & "x " & ConvertItemID(orderSlot4ID) Then
+            order_item_4.Text = orderSlot4Count & "x " & ConvertItemID(orderSlot4ID)
+            appendLog("(UpdateOrder) Set orderSlot4 to OID " & orderSlot4ID & " with " & orderSlot4Count & " count")
         End If
-        If orderSlot5Count = 0 Then
+        If orderSlot5Count = 0 And Not order_item_5.Text = "" Then
             order_item_5.Text = ""
             orderSlot5ID = 0
+            appendLog("(UpdateOrder) Erased orderSlot5")
+        ElseIf orderSlot5ID > 0 And Not order_item_5.Text = orderSlot5Count & "x " & ConvertItemID(orderSlot5ID) Then
+            order_item_5.Text = orderSlot5Count & "x " & ConvertItemID(orderSlot5ID)
+            appendLog("(UpdateOrder) Set orderSlot5 to ID " & orderSlot5ID & " with " & orderSlot5Count & " count")
         End If
-        If orderSlot6Count = 0 Then
+        If orderSlot6Count = 0 And Not order_item_6.Text = "" Then
             order_item_6.Text = ""
             orderSlot6ID = 0
+            appendLog("(UpdateOrder) Erased orderSlot6")
+        ElseIf orderSlot6ID > 0 And Not order_item_6.Text = orderSlot6Count & "x " & ConvertItemID(orderSlot6ID) Then
+            order_item_6.Text = orderSlot6Count & "x " & ConvertItemID(orderSlot6ID)
+            appendLog("(UpdateOrder) Set orderSlot6 to ID " & orderSlot6ID & " with " & orderSlot6Count & " count")
         End If
     End Sub
 
@@ -312,6 +429,7 @@
         Else
             Return 0
         End If
+        appendLog("(GetStockValue) Got stock value of ID" & itemID)
     End Function
 
     Private Sub AddStock(itemID As Integer)
@@ -328,6 +446,7 @@
         ElseIf itemID = 105 Then
             winegumsStock = winegumsStock + 1
         End If
+        appendLog("(AddStock) Added 1 stock of ID" & itemID)
     End Sub
 
     Private Sub RemoveStock(itemID As Integer)
@@ -344,43 +463,31 @@
         ElseIf itemID = 105 Then
             winegumsStock = winegumsStock - 1
         End If
+        appendLog("(RemoveStock) Removed 1 stock of ID" & itemID)
     End Sub
-
-    Private Function ChangeAvalible()
-        If (Convert.ToInt32(coin_1p_return.Text) + Convert.ToInt32(coin_2p_return.Text) + Convert.ToInt32(coin_5p_return.Text) + Convert.ToInt32(coin_10p_return.Text) + Convert.ToInt32(coin_20p_return.Text) + Convert.ToInt32(coin_50p_return.Text) + Convert.ToInt32(coin_100p_return.Text) + Convert.ToInt32(coin_200p_return.Text)) > 0 Then
-            Return True
-        Else
-            Return False
-        End If
-    End Function
 
     Private Sub AddItemOrder(itemID As Integer)
         If GetStockValue(itemID) > 0 Then
             If orderSlot1ID = 0 Or orderSlot1ID = itemID Then
                 orderSlot1Count = orderSlot1Count + 1
-                order_item_1.Text = orderSlot1Count & "x " & ConvertItemID(itemID)
                 orderSlot1ID = itemID
             ElseIf orderSlot2ID = 0 Or orderSlot2ID = itemID Then
                 orderSlot2Count = orderSlot2Count + 1
-                order_item_2.Text = orderSlot2Count & "x " & ConvertItemID(itemID)
                 orderSlot2ID = itemID
             ElseIf orderSlot3ID = 0 Or orderSlot3ID = itemID Then
                 orderSlot3Count = orderSlot3Count + 1
-                order_item_3.Text = orderSlot3Count & "x " & ConvertItemID(itemID)
                 orderSlot3ID = itemID
             ElseIf orderSlot4ID = 0 Or orderSlot4ID = itemID Then
                 orderSlot4Count = orderSlot4Count + 1
-                order_item_4.Text = orderSlot4Count & "x " & ConvertItemID(itemID)
                 orderSlot4ID = itemID
             ElseIf orderSlot5ID = 0 Or orderSlot5ID = itemID Then
                 orderSlot5Count = orderSlot5Count + 1
-                order_item_5.Text = orderSlot5Count & "x " & ConvertItemID(itemID)
                 orderSlot5ID = itemID
             ElseIf orderSlot6ID = 0 Or orderSlot6ID = itemID Then
                 orderSlot6Count = orderSlot6Count + 1
-                order_item_6.Text = orderSlot6Count & "x " & ConvertItemID(itemID)
                 orderSlot6ID = itemID
             End If
+            appendLog("(AddItemOrder) Added 1 of ID" & itemID & " to order")
             UpdateOrder()
             RemoveStock(itemID)
         End If
@@ -390,29 +497,24 @@
     Private Sub RemoveItemOrder(slot As Integer)
         If slot = 1 And orderSlot1Count > 0 Then
             orderSlot1Count = orderSlot1Count - 1
-            order_item_1.Text = orderSlot1Count & "x " & ConvertItemID(orderSlot1ID)
             AddStock(orderSlot1ID)
         ElseIf slot = 2 And orderSlot2Count > 0 Then
             orderSlot2Count = orderSlot2Count - 1
-            order_item_2.Text = orderSlot2Count & "x " & ConvertItemID(orderSlot2ID)
             AddStock(orderSlot2ID)
         ElseIf slot = 3 And orderSlot3Count > 0 Then
             orderSlot3Count = orderSlot3Count - 1
-            order_item_3.Text = orderSlot3Count & "x " & ConvertItemID(orderSlot3ID)
             AddStock(orderSlot3ID)
         ElseIf slot = 4 And orderSlot4Count > 0 Then
             orderSlot4Count = orderSlot4Count - 1
-            order_item_4.Text = orderSlot4Count & "x " & ConvertItemID(orderSlot4ID)
             AddStock(orderSlot4ID)
         ElseIf slot = 5 And orderSlot5Count > 0 Then
             orderSlot5Count = orderSlot5Count - 1
-            order_item_5.Text = orderSlot5Count & "x " & ConvertItemID(orderSlot5ID)
             AddStock(orderSlot5ID)
         ElseIf slot = 6 And orderSlot6Count > 0 Then
             orderSlot6Count = orderSlot6Count - 1
-            order_item_6.Text = orderSlot6Count & "x " & ConvertItemID(orderSlot6ID)
             AddStock(orderSlot6ID)
         End If
+        appendLog("(RemoveItemOrder) Removed 1 from item slot" & slot & " from order")
         UpdateOrder()
     End Sub
 
@@ -433,6 +535,45 @@
             Return 0
         End If
     End Function
+
+    Private Sub ShiftOrderList()
+        If Not orderSlot6ID = 0 And orderSlot5ID = 0 Then
+            orderSlot5ID = orderSlot6ID
+            orderSlot5Count = orderSlot6Count
+            orderSlot6ID = 0
+            orderSlot6Count = 0
+            appendLog("(ShiftOrderList) Shifted ID " & orderSlot6ID & " from slot 6 to slot 5")
+        End If
+        If Not orderSlot5ID = 0 And orderSlot4ID = 0 Then
+            orderSlot4ID = orderSlot5ID
+            orderSlot4Count = orderSlot5Count
+            orderSlot5ID = 0
+            orderSlot5Count = 0
+            appendLog("(ShiftOrderList) Shifted ID " & orderSlot5ID & " from slot 5 to slot 4")
+        End If
+        If Not orderSlot4ID = 0 And orderSlot3ID = 0 Then
+            orderSlot3ID = orderSlot4ID
+            orderSlot3Count = orderSlot4Count
+            orderSlot4ID = 0
+            orderSlot4Count = 0
+            appendLog("(ShiftOrderList) Shifted ID " & orderSlot4ID & " from slot 4 to slot 3")
+        End If
+        If Not orderSlot3ID = 0 And orderSlot2ID = 0 Then
+            orderSlot2ID = orderSlot3ID
+            orderSlot2Count = orderSlot3Count
+            orderSlot3ID = 0
+            orderSlot3Count = 0
+            appendLog("(ShiftOrderList) Shifted ID " & orderSlot3ID & " from slot 3 to slot 2")
+        End If
+        If Not orderSlot2ID = 0 And orderSlot1ID = 0 Then
+            orderSlot1ID = orderSlot2ID
+            orderSlot1Count = orderSlot2Count
+            orderSlot2ID = 0
+            orderSlot2Count = 0
+            appendLog("(ShiftOrderList) Shifted ID " & orderSlot2ID & " from slot 2 to slot 1")
+        End If
+        UpdateOrder()
+    End Sub
 
     Private Function TotalPrice()
         Return SlotTotalPrice(1) + SlotTotalPrice(2) + SlotTotalPrice(3) + SlotTotalPrice(4) + SlotTotalPrice(5) + SlotTotalPrice(6)
@@ -482,6 +623,7 @@
     End Sub
 
     Private Sub coin_change_collect_button_Click(sender As Object, e As EventArgs) Handles coin_change_collect_button.Click
+        appendLog("(ChangeCollect) Change collected")
         InitMachine()
     End Sub
 
@@ -592,6 +734,26 @@
         dispensed_item4.Text = ""
         dispensed_item5.Text = ""
         dispensed_item6.Text = ""
+        dispense_progress.Value = 0
+        appendLog("(ItemsCollect) Items Collected")
+    End Sub
+
+    Private Sub version_Click(sender As Object, e As EventArgs) Handles version.Click
+        Toolbar.Visible = Not Toolbar.Visible
+    End Sub
+
+    Private Sub RefillStockToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles RefillStockToolStripMenuItem.Click
+        pepsiStock = 100
+        cokeStock = 100
+        crispsStock = 100
+        dairymilkStock = 100
+        winegumsStock = 100
+
+        appendLog("(Debug - RefillStock) Refilled all stock to 100 each")
+    End Sub
+
+    Private Sub ConsoleToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ConsoleToolStripMenuItem.Click
+        consoleWindow.Visible = Not consoleWindow.Visible
     End Sub
 
 End Class

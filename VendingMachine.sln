@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 10
-VisualStudioVersion = 10.0.25123.0
+VisualStudioVersion = 10.0.0.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "VendingMachine", "VendingMachine\VendingMachine.vbproj", "{2DDB32AD-B401-4C48-986C-1587065AF5D2}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{D41C9288-998D-4A77-896D-D2A1A48C23A5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
